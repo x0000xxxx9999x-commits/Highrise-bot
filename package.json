@@ -7,6 +7,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "highrise.sdk": "^0.15.0"
+    "highrise.bot": "^2.8.1"
   }
 }
