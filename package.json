@@ -1,0 +1,12 @@
+{
+  "name": "highrise-bot",
+  "version": "1.0.0",
+  "description": "Highrise Welcome Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "highrise.sdk": "^0.15.0"
+  }
+}
