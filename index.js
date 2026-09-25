@@ -115,8 +115,8 @@ bot.on('UserJoined', async (user) => {
     await bot.message.send(msg);
 });
 
-// ============ استقبال رسائل الدردشة ============
-bot.on('ChatMessageCreate', async (user, message) => {
+// ============ استقبال رسائل الدردشة (تم تصحيح اسم الحدث) ============
+bot.on('Chat', async (user, message) => {
     try {
         if (!message || !user) return;
         const msg = String(message).trim();
