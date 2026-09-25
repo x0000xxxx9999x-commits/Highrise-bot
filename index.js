@@ -98,12 +98,6 @@ const dares = [
     "😈 قلد صوت حيوان! 🐱"
 ];
 
-const loveMessages = [
-    "❤️ نسبة الحب بين @{user1} و @{user2}: **{percent}%**",
-    "💕 التوافق بين @{user1} و @{user2}: **{percent}%**",
-    "💖 قصة حب @{user1} و @{user2}: **{percent}%**"
-];
-
 // ============ دالة مساعدة ============
 function getRandom(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -121,174 +115,106 @@ bot.on('UserJoined', async (user) => {
     await bot.message.send(msg);
 });
 
-// ============ الأوامر ============
-bot.on('Chat', async (user, message) => {
-    const msg = message.trim();
-    const args = msg.split(' ');
-    const command = args[0].toLowerCase();
+// ============ استقبال رسائل الدردشة ============
+bot.on('ChatMessageCreate', async (user, message) => {
+    try {
+        if (!message || !user) return;
+        const msg = String(message).trim();
+        const args = msg.split(' ');
+        const command = args[0].toLowerCase();
 
-    // ===== قائمة المساعدة =====
-    if (command === '!مساعدة' || command === '!help') {
-        await bot.message.send(
-            `📜 **قائمة الأوامر:**\n` +
-            `🎉 **ترفيهي:**\n` +
-            `!نكتة - نكتة عشوائية\n` +
-            `!مدح - مدح عشوائي\n` +
-            `!حظ - حظك اليوم\n` +
-            `!حكمة - حكمة عشوائية\n` +
-            `!لغز - لغز مع الجواب\n` +
-            `!تحية - تحية حلوة\n` +
-            `!سلام - رد السلام\n\n` +
-            `🎲 **ألعاب:**\n` +
-            `!نرد - رمي النرد\n` +
-            `!رمي - رمي عملة\n` +
-            `!قرعة [خيار1 خيار2 ...] - اختيار عشوائي\n` +
-            `!عجلة - عجلة الحظ\n` +
-            `!سؤال - سؤال عشوائي\n` +
-            `!حقيقة - حقيقة\n` +
-            `!تحدي - تحدي\n` +
-            `!صراحة - حقيقة أو تحدي\n\n` +
-            `💕 **رومانسي:**\n` +
-            `!قلب @شخص - نسبة الحب\n\n` +
-            `ℹ️ **عام:**\n` +
-            `!وقت - الساعة الآن\n` +
-            `!تاريخ - التاريخ اليوم\n` +
-            `!ping - اختبار الاتصال`
-        );
-    }
+        console.log(`💬 رسالة من ${user.username}: ${msg}`);
 
-    // ===== نكتة =====
-    if (command === '!نكتة') {
-        await bot.message.send(getRandom(jokes));
-    }
-
-    // ===== مدح =====
-    if (command === '!مدح') {
-        const compliment = getRandom(compliments).replace('{user}', user.username);
-        await bot.message.send(compliment);
-    }
-
-    // ===== حظ =====
-    if (command === '!حظ') {
-        await bot.message.send(getRandom(fortunes));
-    }
-
-    // ===== حكمة =====
-    if (command === '!حكمة') {
-        await bot.message.send(getRandom(wisdom));
-    }
-
-    // ===== لغز =====
-    if (command === '!لغز') {
-        await bot.message.send(getRandom(riddles));
-    }
-
-    // ===== تحية =====
-    if (command === '!تحية') {
-        await bot.message.send(`👋 أهلاً بك @${user.username}! كيف حالك اليوم؟`);
-    }
-
-    // ===== سلام =====
-    if (command === '!سلام') {
-        await bot.message.send(`🕊️ وعليكم السلام ورحمة الله @${user.username}!`);
-    }
-
-    // ===== نرد =====
-    if (command === '!نرد') {
-        const result = Math.floor(Math.random() * 6) + 1;
-        await bot.message.send(`🎲 @${user.username} رمى النرد وطلع: **${result}**`);
-    }
-
-    // ===== رمي عملة =====
-    if (command === '!رمي') {
-        const result = Math.random() < 0.5 ? "🪙 **صورة** (وجه)" : "🪙 **كتابة** (ظهر)";
-        await bot.message.send(`@${user.username} رما العملة وطلع: ${result}`);
-    }
-
-    // ===== قرعة =====
-    if (command === '!قرعة') {
-        const options = args.slice(1);
-        if (options.length < 2) {
-            await bot.message.send(`❌ الاستخدام: \`!قرعة خيار1 خيار2 خيار3\`\nمثال: \`!قرعة أحمد محمد علي\``);
+        // ===== قائمة المساعدة =====
+        if (command === '!مساعدة' || command === '!help') {
+            await bot.message.send(
+                `📜 **قائمة الأوامر:**\n` +
+                `🎉 **ترفيهي:** !نكتة | !مدح | !حظ | !حكمة | !لغز | !تحية | !سلام\n` +
+                `🎲 **ألعاب:** !نرد | !رمي | !قرعة | !عجلة | !سؤال | !حقيقة | !تحدي | !صراحة\n` +
+                `💕 **رومانسي:** !قلب @شخص\n` +
+                `ℹ️ **عام:** !وقت | !تاريخ | !ping`
+            );
             return;
         }
-        const chosen = getRandom(options);
-        await bot.message.send(`🎯 القرعة اختارت: **${chosen}**`);
-    }
 
-    // ===== عجلة الحظ =====
-    if (command === '!عجلة') {
-        const wheel = ["🍀 حظ سعيد!", "💀 حظ سيء!", "⭐ حظ ممتاز!", "🌈 حظ رائع!", "⚡ حظ متوسط", "💎 حظ ماسي!"];
-        await bot.message.send(`🎡 @${user.username} لفة العجلة وطلع: ${getRandom(wheel)}`);
-    }
+        if (command === '!نكتة') { await bot.message.send(getRandom(jokes)); return; }
+        if (command === '!مدح') { await bot.message.send(getRandom(compliments).replace('{user}', user.username)); return; }
+        if (command === '!حظ') { await bot.message.send(getRandom(fortunes)); return; }
+        if (command === '!حكمة') { await bot.message.send(getRandom(wisdom)); return; }
+        if (command === '!لغز') { await bot.message.send(getRandom(riddles)); return; }
+        if (command === '!تحية') { await bot.message.send(`👋 أهلاً بك @${user.username}! كيف حالك اليوم؟`); return; }
+        if (command === '!سلام') { await bot.message.send(`🕊️ وعليكم السلام ورحمة الله @${user.username}!`); return; }
 
-    // ===== سؤال =====
-    if (command === '!سؤال') {
-        await bot.message.send(`${getRandom(questions)}`);
-    }
-
-    // ===== حقيقة =====
-    if (command === '!حقيقة') {
-        await bot.message.send(`${getRandom(truths)}`);
-    }
-
-    // ===== تحدي =====
-    if (command === '!تحدي') {
-        await bot.message.send(`${getRandom(dares)}`);
-    }
-
-    // ===== صراحة (حقيقة أو تحدي) =====
-    if (command === '!صراحة') {
-        const all = [...truths, ...dares];
-        await bot.message.send(`${getRandom(all)}`);
-    }
-
-    // ===== قلب (نسبة الحب) =====
-    if (command === '!قلب') {
-        const mention = args[1];
-        if (!mention) {
-            await bot.message.send(`❌ الاستخدام: \`!قلب @الشخص\``);
+        if (command === '!نرد') {
+            const result = Math.floor(Math.random() * 6) + 1;
+            await bot.message.send(`🎲 @${user.username} رمى النرد وطلع: **${result}**`);
             return;
         }
-        const percent = Math.floor(Math.random() * 101);
-        const target = mention.replace('@', '');
-        const template = getRandom(loveMessages);
-        await bot.message.send(template.replace('{user1}', user.username).replace('{user2}', target).replace('{percent}', percent));
-    }
+        if (command === '!رمي') {
+            const result = Math.random() < 0.5 ? "🪙 **صورة** (وجه)" : "🪙 **كتابة** (ظهر)";
+            await bot.message.send(`@${user.username} رما العملة وطلع: ${result}`);
+            return;
+        }
+        if (command === '!قرعة') {
+            const options = args.slice(1);
+            if (options.length < 2) {
+                await bot.message.send(`❌ الاستخدام: \`!قرعة خيار1 خيار2 خيار3\``);
+                return;
+            }
+            await bot.message.send(`🎯 القرعة اختارت: **${getRandom(options)}**`);
+            return;
+        }
+        if (command === '!عجلة') {
+            const wheel = ["🍀 حظ سعيد!", "💀 حظ سيء!", "⭐ حظ ممتاز!", "🌈 حظ رائع!", "⚡ حظ متوسط", "💎 حظ ماسي!"];
+            await bot.message.send(`🎡 @${user.username} لفة العجلة وطلع: ${getRandom(wheel)}`);
+            return;
+        }
+        if (command === '!سؤال') { await bot.message.send(`${getRandom(questions)}`); return; }
+        if (command === '!حقيقة') { await bot.message.send(`${getRandom(truths)}`); return; }
+        if (command === '!تحدي') { await bot.message.send(`${getRandom(dares)}`); return; }
+        if (command === '!صراحة') {
+            const all = [...truths, ...dares];
+            await bot.message.send(`${getRandom(all)}`);
+            return;
+        }
+        if (command === '!قلب') {
+            const target = args[1];
+            if (!target) { await bot.message.send(`❌ الاستخدام: \`!قلب @الشخص\``); return; }
+            const percent = Math.floor(Math.random() * 101);
+            const targetName = target.replace('@', '');
+            await bot.message.send(`❤️ نسبة الحب بين @${user.username} و @${targetName}: **${percent}%**`);
+            return;
+        }
+        if (command === '!وقت') {
+            const now = new Date();
+            const time = now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
+            await bot.message.send(`🕐 الوقت الآن: **${time}**`);
+            return;
+        }
+        if (command === '!تاريخ') {
+            const now = new Date();
+            const date = now.toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            await bot.message.send(`📅 التاريخ اليوم: **${date}**`);
+            return;
+        }
+        if (command === '!ping') { await bot.message.send(`🏓 Pong! @${user.username}`); return; }
 
-    // ===== وقت =====
-    if (command === '!وقت') {
-        const now = new Date();
-        const time = now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
-        await bot.message.send(`🕐 الوقت الآن: **${time}**`);
-    }
-
-    // ===== تاريخ =====
-    if (command === '!تاريخ') {
-        const now = new Date();
-        const date = now.toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        await bot.message.send(`📅 التاريخ اليوم: **${date}**`);
-    }
-
-    // ===== ping =====
-    if (command === '!ping') {
-        await bot.message.send(`🏓 Pong! @${user.username}`);
-    }
-
-    // ===== ردود تلقائية على التحيات =====
-    const greetings = ['هلا', 'مرحبا', 'السلام عليكم', 'سلام', 'اهلا', 'أهلا', 'هاي', 'hi', 'hello'];
-    if (greetings.includes(msg.toLowerCase())) {
-        await bot.message.send(`👋 أهلاً بك @${user.username}! نورت الغرفة 🌟`);
-    }
-
-    // ===== رد على "شكراً" =====
-    if (msg.includes('شكرا') || msg.includes('شكراً') || msg.includes('تسلم')) {
-        await bot.message.send(`🤍 على الرحب والسعة @${user.username}!`);
-    }
-
-    // ===== رد على "كيفك" =====
-    if (msg.includes('كيفك') || msg.includes('شلونك') || msg.includes('اخبارك')) {
-        await bot.message.send(`😊 بخير دامك موجود @${user.username}!`);
+        // ===== ردود تلقائية =====
+        const greetings = ['هلا', 'مرحبا', 'السلام عليكم', 'سلام', 'اهلا', 'أهلا', 'هاي', 'hi', 'hello'];
+        if (greetings.includes(msg.toLowerCase())) {
+            await bot.message.send(`👋 أهلاً بك @${user.username}! نورت الغرفة 🌟`);
+            return;
+        }
+        if (msg.includes('شكرا') || msg.includes('شكراً') || msg.includes('تسلم')) {
+            await bot.message.send(`🤍 على الرحب والسعة @${user.username}!`);
+            return;
+        }
+        if (msg.includes('كيفك') || msg.includes('شلونك') || msg.includes('اخبارك')) {
+            await bot.message.send(`😊 بخير دامك موجود @${user.username}!`);
+            return;
+        }
+    } catch (err) {
+        console.error('خطأ في معالجة الرسالة:', err);
     }
 });
 
