@@ -63,11 +63,8 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ═══════════════════════════════════════
 bot.once('Ready', () => {
     console.log('✅ Bot Connected');
-    console.log('🔍 Methods available:');
-    console.log('   bot.player:', typeof bot.player);
-    console.log('   bot.player.emote:', bot.player && typeof bot.player.emote);
-    console.log('   bot.player.dance:', bot.player && typeof bot.player.dance);
-    console.log('   bot.webapi:', typeof bot.webapi);
+    console.log('🔍 Methods:');
+    console.log('   bot.player.emote:', typeof (bot.player && bot.player.emote));
 });
 
 // ═══════════════════════════════════════
@@ -91,65 +88,57 @@ bot.on('Chat', async (user, message) => {
         const text = getText(message);
         const lower = text.toLowerCase();
 
-        console.log(`📨 ${username} (${userId}): "${text}"`);
+        console.log(`📨 ${username}: "${text}"`);
 
         // ═══════ !مساعدة ═══════
         if (lower === '!مساعدة' || lower === '!help') {
             await delay(300);
-            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي\n!8 مدح\n!user معلومات مستخدم\n!rust رقصة`);
+            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي\n!8 مدح\n!user معلومات\n!rust رقصة`);
             return;
         }
 
         // ═══════════════════════════════════════
-        // ═══════ !rust رقصة Rust ═══════
+        // ═══════ !rust رقصة ═══════
         // ═══════════════════════════════════════
         if (lower === '!rust') {
             try {
                 await delay(300);
-                console.log(`💃 Triggering rust dance for ${username} (${userId})`);
+                console.log(`💃 Trying rust dance for ${username} (${userId})`);
+
+                // قائمة كل الاحتمالات
+                const possibleEmotes = [
+                    'emote-rust',
+                    'emote-dance-rust',
+                    'emote-rust-dance',
+                    'emote-rustdance',
+                    'rust',
+                    'dance-rust',
+                    'emote-dance',
+                    'dance',
+                    'emote-1',
+                    'emote-01'
+                ];
 
                 let success = false;
+                let usedId = '';
 
-                // ═══ الطريقة 1: bot.player.emote ═══
-                if (typeof bot.player?.emote === 'function') {
+                for (const emoteId of possibleEmotes) {
                     try {
-                        await bot.player.emote(userId, 'emote-rust-dance');
+                        console.log(`🧪 Trying: ${emoteId}`);
+                        await bot.player.emote(userId, emoteId);
+                        usedId = emoteId;
                         success = true;
-                        console.log('✅ player.emote worked');
-                    } catch (e) { console.log('Method 1 failed:', e.message); }
-                }
-
-                // ═══ الطريقة 2: bot.player.dance ═══
-                if (!success && typeof bot.player?.dance === 'function') {
-                    try {
-                        await bot.player.dance(userId);
-                        success = true;
-                        console.log('✅ player.dance worked');
-                    } catch (e) { console.log('Method 2 failed:', e.message); }
-                }
-
-                // ═══ الطريقة 3: bot.webapi.player.emote ═══
-                if (!success && typeof bot.webapi?.player?.emote === 'function') {
-                    try {
-                        await bot.webapi.player.emote(userId, 'emote-rust-dance');
-                        success = true;
-                        console.log('✅ webapi.player.emote worked');
-                    } catch (e) { console.log('Method 3 failed:', e.message); }
-                }
-
-                // ═══ الطريقة 4: bot.players.emote ═══
-                if (!success && typeof bot.players?.emote === 'function') {
-                    try {
-                        await bot.players.emote(userId, 'emote-rust-dance');
-                        success = true;
-                        console.log('✅ players.emote worked');
-                    } catch (e) { console.log('Method 4 failed:', e.message); }
+                        console.log(`✅ Worked: ${emoteId}`);
+                        break;
+                    } catch (e) {
+                        console.log(`❌ ${emoteId}: ${e.message}`);
+                    }
                 }
 
                 if (success) {
-                    await bot.message.send(`💃 ${username} يرقص رست! 🔥`);
+                    await bot.message.send(`💃 ${username} يرقص!`);
                 } else {
-                    await bot.message.send(`⚠️ ما قدرت أرقصك — شوف Console`);
+                    await bot.message.send(`⚠️ ما لقيت الرقصة`);
                 }
 
             } catch (e) {
@@ -265,9 +254,7 @@ bot.on('Chat', async (user, message) => {
             return;
         }
 
-        // ═══════════════════════════════════════
         // ═══════ !user معلومات مستخدم ═══════
-        // ═══════════════════════════════════════
         if (lower.startsWith('!user') || lower.startsWith('!معلومات') || lower.startsWith('!يوزر')) {
             try {
                 let target = text
