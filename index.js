@@ -2,26 +2,6 @@ const { Highrise } = require('highrise.bot');
 const bot = new Highrise();
 
 // ═══════════════════════════════════════
-// معلومات المالك
-// ═══════════════════════════════════════
-const OWNER_USERNAME = 'c1q'; // صاحب البوت
-
-// ═══════════════════════════════════════
-// قائمة اللبسات (outfit IDs)
-// ═══════════════════════════════════════
-const outfits = [
-    // ألوان نيون
-    { name: '🔴 أحمر ناري', id: 'outfit-f7e53a5a-9d3b-4b4c-8e2a-3c8d7e8f9a1b' },
-    { name: '🔵 أزرق سماوي', id: 'outfit-a8b2c3d4-e5f6-7890-abcd-ef1234567890' },
-    { name: '🟢 أخضر نيون', id: 'outfit-12345678-90ab-cdef-1234-567890abcdef' },
-    { name: '🟣 بنفسجي', id: 'outfit-fedcba98-7654-3210-fedc-ba9876543210' },
-    { name: '⚫ أسود رسمي', id: 'outfit-11111111-2222-3333-4444-555555555555' },
-    { name: '⚪ أبيض ملكي', id: 'outfit-66666666-7777-8888-9999-000000000000' },
-    { name: '🟡 ذهبي فخم', id: 'outfit-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' },
-    { name: '🩷 وردي هادئ', id: 'outfit-bbbbbbbb-cccc-dddd-eeee-ffffffffffff' }
-];
-
-// ═══════════════════════════════════════
 // البيانات
 // ═══════════════════════════════════════
 const jokes = [
@@ -78,15 +58,16 @@ function getText(message) {
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function isOwner(username) {
-    return username && username.toLowerCase() === OWNER_USERNAME.toLowerCase();
-}
-
 // ═══════════════════════════════════════
 // عند الاتصال
 // ═══════════════════════════════════════
 bot.once('Ready', () => {
     console.log('✅ Bot Connected');
+    console.log('🔍 Methods available:');
+    console.log('   bot.player:', typeof bot.player);
+    console.log('   bot.player.emote:', bot.player && typeof bot.player.emote);
+    console.log('   bot.player.dance:', bot.player && typeof bot.player.dance);
+    console.log('   bot.webapi:', typeof bot.webapi);
 });
 
 // ═══════════════════════════════════════
@@ -106,15 +87,75 @@ bot.on('UserJoined', async (user) => {
 bot.on('Chat', async (user, message) => {
     try {
         const username = user.username || 'User';
+        const userId = user.id;
         const text = getText(message);
         const lower = text.toLowerCase();
 
-        console.log(`📨 ${username}: "${text}"`);
+        console.log(`📨 ${username} (${userId}): "${text}"`);
 
         // ═══════ !مساعدة ═══════
         if (lower === '!مساعدة' || lower === '!help') {
             await delay(300);
-            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي\n!8 مدح\n!user معلومات مستخدم`);
+            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي\n!8 مدح\n!user معلومات مستخدم\n!rust رقصة`);
+            return;
+        }
+
+        // ═══════════════════════════════════════
+        // ═══════ !rust رقصة Rust ═══════
+        // ═══════════════════════════════════════
+        if (lower === '!rust') {
+            try {
+                await delay(300);
+                console.log(`💃 Triggering rust dance for ${username} (${userId})`);
+
+                let success = false;
+
+                // ═══ الطريقة 1: bot.player.emote ═══
+                if (typeof bot.player?.emote === 'function') {
+                    try {
+                        await bot.player.emote(userId, 'emote-rust-dance');
+                        success = true;
+                        console.log('✅ player.emote worked');
+                    } catch (e) { console.log('Method 1 failed:', e.message); }
+                }
+
+                // ═══ الطريقة 2: bot.player.dance ═══
+                if (!success && typeof bot.player?.dance === 'function') {
+                    try {
+                        await bot.player.dance(userId);
+                        success = true;
+                        console.log('✅ player.dance worked');
+                    } catch (e) { console.log('Method 2 failed:', e.message); }
+                }
+
+                // ═══ الطريقة 3: bot.webapi.player.emote ═══
+                if (!success && typeof bot.webapi?.player?.emote === 'function') {
+                    try {
+                        await bot.webapi.player.emote(userId, 'emote-rust-dance');
+                        success = true;
+                        console.log('✅ webapi.player.emote worked');
+                    } catch (e) { console.log('Method 3 failed:', e.message); }
+                }
+
+                // ═══ الطريقة 4: bot.players.emote ═══
+                if (!success && typeof bot.players?.emote === 'function') {
+                    try {
+                        await bot.players.emote(userId, 'emote-rust-dance');
+                        success = true;
+                        console.log('✅ players.emote worked');
+                    } catch (e) { console.log('Method 4 failed:', e.message); }
+                }
+
+                if (success) {
+                    await bot.message.send(`💃 ${username} يرقص رست! 🔥`);
+                } else {
+                    await bot.message.send(`⚠️ ما قدرت أرقصك — شوف Console`);
+                }
+
+            } catch (e) {
+                console.log('❌ rust error:', e.message);
+                await bot.message.send(`⚠️ خطأ`);
+            }
             return;
         }
 
@@ -242,7 +283,6 @@ bot.on('Chat', async (user, message) => {
                 await bot.message.send(`🔍 جاري البحث عن ${target}...`);
 
                 const profile = await bot.webapi.users.get(target);
-                console.log('🔍 Profile data:', JSON.stringify(profile));
 
                 if (!profile || !profile.ok) {
                     await bot.message.send(`❌ ما لقيت المستخدم: ${target}`);
@@ -281,125 +321,10 @@ bot.on('Chat', async (user, message) => {
                 }
 
                 await bot.message.send(`📋 معلومات ${profile.username || target}:\n${info.join('\n')}`);
-                console.log(`✅ Sent info for: ${target}`);
 
             } catch (e) {
                 console.log('❌ user error:', e.message);
                 await bot.message.send(`⚠️ خطأ في جلب معلومات المستخدم`);
-            }
-            return;
-        }
-
-        // ═══════════════════════════════════════
-        // ═══════ !pop تغيير لبس البوت ═══════
-        // ═══════ (للمالك c1q فقط) ═══════
-        // ═══════════════════════════════════════
-        if (lower === '!pop') {
-            // فحص إذا المستخدم هو المالك
-            if (!isOwner(username)) {
-                await delay(300);
-                await bot.message.send(`❌ هذا الأمر خاص بالمالك فقط`);
-                return;
-            }
-
-            try {
-                await delay(300);
-                
-                // اختار لبس عشوائي
-                const outfit = rand(outfits);
-                
-                await bot.message.send(`🎨 جاري تغيير اللبس إلى ${outfit.name}...`);
-                
-                // محاولة تغيير اللبس
-                try {
-                    // جرّب الطريقة الأولى
-                    if (bot.outfit && bot.outfit.change) {
-                        await bot.outfit.change(outfit.id);
-                    }
-                    // جرّب الطريقة الثانية
-                    else if (bot.player && bot.player.setOutfit) {
-                        await bot.player.setOutfit(outfit.id);
-                    }
-                    // جرّب الطريقة الثالثة
-                    else if (bot.webapi && bot.webapi.users && bot.webapi.users.setOutfit) {
-                        await bot.webapi.users.setOutfit(outfit.id);
-                    }
-                    
-                    await delay(500);
-                    await bot.message.send(`✅ تم التغيير إلى: ${outfit.name}`);
-                    
-                } catch (err) {
-                    console.log('❌ outfit error:', err.message);
-                    await bot.message.send(`⚠️ ما قدرت أغير اللبس. تحقق من Console.`);
-                }
-                
-            } catch (e) {
-                console.log('❌ pop error:', e.message);
-            }
-            return;
-        }
-
-        // ═══════════════════════════════════════
-        // ═══════ !poplist قائمة اللبسات ═══════
-        // ═══════ (للمالك فقط) ═══════
-        // ═══════════════════════════════════════
-        if (lower === '!poplist') {
-            if (!isOwner(username)) {
-                await delay(300);
-                await bot.message.send(`❌ هذا الأمر خاص بالمالك فقط`);
-                return;
-            }
-            
-            await delay(300);
-            let list = '🎨 اللبسات المتوفرة:\n';
-            outfits.forEach((o, i) => {
-                list += `${i + 1}. ${o.name}\n`;
-            });
-            await bot.message.send(list);
-            return;
-        }
-
-        // ═══════════════════════════════════════
-        // ═══════ !follow البوت يتابعك ═══════
-        // ═══════ (للمالك فقط) ═══════
-        // ═══════════════════════════════════════
-        if (lower === '!follow' || lower === '!تابعني') {
-            if (!isOwner(username)) {
-                await delay(300);
-                await bot.message.send(`❌ هذا الأمر خاص بالمالك فقط`);
-                return;
-            }
-
-            try {
-                await delay(300);
-                await bot.message.send(`⏳ جاري المتابعة...`);
-
-                // الحصول على معرف المستخدم
-                const userProfile = await bot.webapi.users.get(username);
-                
-                if (!userProfile || !userProfile.ok) {
-                    await bot.message.send(`❌ ما قدرت ألاقيك`);
-                    return;
-                }
-
-                const userId = userProfile.user_id || userProfile.id;
-                
-                // محاولة المتابعة
-                try {
-                    if (bot.webapi && bot.webapi.users && bot.webapi.users.follow) {
-                        await bot.webapi.users.follow(userId);
-                        await bot.message.send(`✅ الآن أتابعك يا ${username}! 💚`);
-                    } else {
-                        await bot.message.send(`⚠️ خاصية المتابعة غير متوفرة في المكتبة`);
-                    }
-                } catch (err) {
-                    console.log('❌ follow error:', err.message);
-                    await bot.message.send(`⚠️ ما قدرت أتابعك`);
-                }
-
-            } catch (e) {
-                console.log('❌ follow error:', e.message);
-                await bot.message.send(`⚠️ خطأ`);
             }
             return;
         }
