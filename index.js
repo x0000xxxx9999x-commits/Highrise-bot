@@ -1,7 +1,9 @@
 const { Highrise } = require('highrise.bot');
 const bot = new Highrise();
 
-// ═══════ البيانات ═══════
+// ═══════════════════════════════════════
+// البيانات
+// ═══════════════════════════════════════
 const jokes = [
     'واحد دخل المطعم قال: عندكم دجاج؟ قال: لا. قال: ليش المطعم مفتوح؟ قال: نخبر الناس! 😂',
     'واحد راح للدكتور قال: كل ما أشرب شاي أحس بألم في عيني! قال: شيل الملعقة من الكوب! 😂',
@@ -27,12 +29,16 @@ const challenges = [
     'قلد صوت حيوان! 🐱'
 ];
 
-// ═══════ ذاكرة الألعاب ═══════
+// ═══════════════════════════════════════
+// ذاكرة الألعاب
+// ═══════════════════════════════════════
 const rpsGames = {};
 const guessGames = {};
 const riddleGames = {};
 
-// ═══════ دوال ═══════
+// ═══════════════════════════════════════
+// دوال مساعدة
+// ═══════════════════════════════════════
 function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function getText(message) {
@@ -45,12 +51,16 @@ function getText(message) {
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ═══════ الاتصال ═══════
+// ═══════════════════════════════════════
+// عند الاتصال
+// ═══════════════════════════════════════
 bot.once('Ready', () => {
     console.log('✅ Bot Connected');
 });
 
-// ═══════ الترحيب ═══════
+// ═══════════════════════════════════════
+// الترحيب
+// ═══════════════════════════════════════
 bot.on('UserJoined', async (user) => {
     console.log(`👤 Join: ${user.username}`);
     try {
@@ -59,7 +69,9 @@ bot.on('UserJoined', async (user) => {
     } catch (e) { console.log('Error:', e.message); }
 });
 
-// ═══════ الرسائل ═══════
+// ═══════════════════════════════════════
+// استقبال الرسائل
+// ═══════════════════════════════════════
 bot.on('Chat', async (user, message) => {
     try {
         const username = user.username || 'User';
@@ -71,7 +83,7 @@ bot.on('Chat', async (user, message) => {
         // ═══════ !مساعدة ═══════
         if (lower === '!مساعدة' || lower === '!help') {
             await delay(300);
-            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي`);
+            await bot.message.send(`📜 الأوامر:\n!1 نرد\n!2 عملة\n!3 حجر ورقة مقص\n!4 خمن الرقم\n!5 لغز\n!6 نكتة\n!7 تحدي\n!user معلومات مستخدم`);
             return;
         }
 
@@ -174,6 +186,86 @@ bot.on('Chat', async (user, message) => {
             return;
         }
 
+        // ═══════════════════════════════════════
+        // ═══════ !user معلومات مستخدم ═══════
+        // ═══════════════════════════════════════
+        if (lower.startsWith('!user') || lower.startsWith('!معلومات') || lower.startsWith('!يوزر')) {
+            try {
+                // استخرج الاسم المستهدف
+                let target = text
+                    .replace(/^!user/i, '')
+                    .replace(/^!معلومات/, '')
+                    .replace(/^!يوزر/, '')
+                    .trim();
+
+                target = target.replace('@', '').trim();
+
+                // إذا ما كتب اسم → معلومات نفسه
+                if (!target) {
+                    target = username;
+                }
+
+                await delay(500);
+                await bot.message.send(`🔍 جاري البحث عن ${target}...`);
+
+                // جلب البيانات
+                const profile = await bot.webapi.users.get(target);
+
+                console.log('🔍 Profile data:', JSON.stringify(profile));
+
+                if (!profile || !profile.ok) {
+                    await bot.message.send(`❌ ما لقيت المستخدم: ${target}`);
+                    return;
+                }
+
+                // بناء قائمة المعلومات
+                const info = [];
+                info.push(`👤 الاسم: ${profile.username || target}`);
+
+                if (profile.bio && profile.bio.trim()) {
+                    info.push(`📝 النبذة: ${profile.bio}`);
+                }
+
+                info.push(`👥 الأصدقاء: ${profile.friends || 0}`);
+                info.push(`⭐ المتابعون: ${profile.followers || 0}`);
+                info.push(`➡️ يتابع: ${profile.following || 0}`);
+
+                if (profile.joinedAt) {
+                    try {
+                        const d = new Date(profile.joinedAt);
+                        info.push(`📅 انضم: ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`);
+                    } catch (e) {}
+                }
+
+                if (profile.lastOnlineIn) {
+                    try {
+                        const d = new Date(profile.lastOnlineIn);
+                        info.push(`🕐 آخر ظهور: ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`);
+                    } catch (e) {}
+                }
+
+                if (profile.crew && profile.crew.name) {
+                    info.push(`🎭 العصابة: ${profile.crew.name}`);
+                }
+
+                if (profile.activeRoom && profile.activeRoom.name) {
+                    info.push(`🏠 في غرفة: ${profile.activeRoom.name}`);
+                }
+
+                if (profile.countryCode) {
+                    info.push(`🌍 الدولة: ${profile.countryCode}`);
+                }
+
+                await bot.message.send(`📋 معلومات ${profile.username || target}:\n${info.join('\n')}`);
+                console.log(`✅ Sent info for: ${target}`);
+
+            } catch (e) {
+                console.log('❌ user error:', e.message);
+                await bot.message.send(`⚠️ خطأ في جلب معلومات المستخدم`);
+            }
+            return;
+        }
+
         // ═══════ ردود تلقائية ═══════
         const greetings = ['هلا', 'مرحبا', 'سلام', 'اهلا', 'أهلا', 'hi', 'hello', 'السلام عليكم'];
         if (greetings.includes(lower)) {
@@ -199,5 +291,8 @@ bot.on('Chat', async (user, message) => {
     }
 });
 
+// ═══════════════════════════════════════
+// تسجيل الدخول
+// ═══════════════════════════════════════
 bot.login(process.env.HIGHRISE_TOKEN, process.env.HIGHRISE_ROOM_ID);
 console.log('🚀 Bot Starting...');
