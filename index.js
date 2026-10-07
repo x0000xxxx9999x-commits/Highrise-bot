@@ -4,14 +4,14 @@ const path = require('path');
 const bot = new Highrise();
 
 // ═══════════════════════════════════════
-// ملف الرقصات
+// ملف الحركات
 // ═══════════════════════════════════════
 const DANCES_FILE = path.join(__dirname, 'dances.json');
 let savedDances = [];
 try {
     if (fs.existsSync(DANCES_FILE)) {
         savedDances = JSON.parse(fs.readFileSync(DANCES_FILE, 'utf8'));
-        console.log(`📂 Loaded ${savedDances.length} dances`);
+        console.log(`📂 Loaded ${savedDances.length} movements`);
     }
 } catch (e) { savedDances = []; }
 
@@ -20,60 +20,15 @@ function saveDances() {
     catch (e) {}
 }
 
-function addDance(emoteId, emoteName) {
+function addDance(emoteId) {
     if (!emoteId || typeof emoteId !== 'string') return false;
     const exists = savedDances.find(d => d.id === emoteId);
     if (exists) return false;
-    savedDances.push({ id: emoteId, name: emoteName || `Dance ${savedDances.length + 1}` });
+    savedDances.push({ id: emoteId, name: emoteId });
     saveDances();
     return true;
 }
 
-// ═══════════════════════════════════════
-// البيانات
-// ═══════════════════════════════════════
-const jokes = [
-    'واحد دخل المطعم قال: عندكم دجاج؟ قال: لا. قال: ليش المطعم مفتوح؟ قال: نخبر الناس! 😂',
-    'واحد راح للدكتور قال: كل ما أشرب شاي أحس بألم في عيني! قال: شيل الملعقة من الكوب! 😂',
-    'سألوا واحد: ليش تمشي ورا البنت؟ قال: من زود الأدب! 😂',
-    'واحد قال لصاحبه: أمس حلمت إني شربت بحر! قال: شلون؟ قال: بسرعة! 😂',
-    'واحد سأل صاحبه: عندك ساعة؟ قال: عندي بس ما أعرف الوقت! 😂'
-];
-
-const riddles = [
-    { q: 'شي يمشي وما عنده رجلين؟', a: 'الماء' },
-    { q: 'شي كل ما أخذت منه كبر؟', a: 'الحفرة' },
-    { q: 'عنده أسنان وما يعض؟', a: 'المشط' },
-    { q: 'يدخل الماء ولا يبتل؟', a: 'الضوء' },
-    { q: 'كلما زاد نقص؟', a: 'العمر' },
-    { q: 'شي يكتب ولا يقرأ؟', a: 'القلم' }
-];
-
-const challenges = [
-    'اكتب اسمك بالمقلوب! 🔄',
-    'قل شي حلو لأول شخص يدخل! 🌹',
-    'اكتب أحبكم كلكم! ❤️',
-    'سوي رقصة! 💃',
-    'قلد صوت حيوان! 🐱'
-];
-
-const compliments = [
-    'إنت أسطورة! 🔥',
-    'وجودك ينور الغرفة! ✨',
-    'إنت الأفضل! 💯',
-    'ربنا يحميك! 🤍'
-];
-
-// ═══════════════════════════════════════
-// ذاكرة الألعاب
-// ═══════════════════════════════════════
-const rpsGames = {};
-const guessGames = {};
-const riddleGames = {};
-
-// ═══════════════════════════════════════
-// دوال مساعدة
-// ═══════════════════════════════════════
 function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function getText(message) {
@@ -87,45 +42,75 @@ function getText(message) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ═══════════════════════════════════════
-// الاتصال
+// الاتصال - نشوف كل الطرق المتوفرة
 // ═══════════════════════════════════════
 bot.once('Ready', () => {
     console.log('✅ Bot Connected');
-    console.log(`💃 Dances in memory: ${savedDances.length}`);
+    console.log(`📂 Movements: ${savedDances.length}`);
 
-    console.log('🔍 Available methods:');
+    console.log('═══════════════════════════════');
+    console.log('🔍 Checking all available methods:');
+    console.log('═══════════════════════════════');
+
+    // bot.player
     if (bot.player) {
+        console.log('bot.player methods:');
+        Object.getOwnPropertyNames(Object.getPrototypeOf(bot.player)).forEach(m => {
+            if (typeof bot.player[m] === 'function') {
+                console.log(`   ✅ bot.player.${m}()`);
+            }
+        });
         Object.keys(bot.player).forEach(k => {
-            console.log(`   bot.player.${k}: ${typeof bot.player[k]}`);
+            if (typeof bot.player[k] === 'function') {
+                console.log(`   ✅ bot.player.${k}()`);
+            }
         });
     }
+
+    // bot.room
+    if (bot.room) {
+        console.log('bot.room methods:');
+        Object.getOwnPropertyNames(Object.getPrototypeOf(bot.room)).forEach(m => {
+            if (typeof bot.room[m] === 'function') {
+                console.log(`   ✅ bot.room.${m}()`);
+            }
+        });
+    }
+
+    // bot.webapi
     if (bot.webapi) {
+        console.log('bot.webapi keys:');
         Object.keys(bot.webapi).forEach(k => {
-            console.log(`   bot.webapi.${k}: ${typeof bot.webapi[k]}`);
+            console.log(`   📦 bot.webapi.${k}: ${typeof bot.webapi[k]}`);
         });
     }
+
+    // bot.highrise (low level)
+    if (bot.highrise) {
+        console.log('bot.highrise methods:');
+        Object.getOwnPropertyNames(Object.getPrototypeOf(bot.highrise)).forEach(m => {
+            if (typeof bot.highrise[m] === 'function') {
+                console.log(`   ✅ bot.highrise.${m}()`);
+            }
+        });
+    }
+
+    console.log('═══════════════════════════════');
 });
 
 // ═══════════════════════════════════════
-// استقبال الرقصات
+// استقبال الحركات
 // ═══════════════════════════════════════
 bot.on('Emote', (userData, emoteData) => {
-    console.log(`🎭 Emote Event`);
-    console.log(`   User:`, JSON.stringify(userData));
-    console.log(`   Emote:`, JSON.stringify(emoteData));
-
     let emoteId = null;
+    if (typeof emoteData === 'string') emoteId = emoteData;
+    else if (emoteData && emoteData.id) emoteId = emoteData.id;
+    else if (emoteData && emoteData.name) emoteId = emoteData.name;
 
-    if (typeof emoteData === 'string') {
-        emoteId = emoteData;
-    } else if (emoteData && typeof emoteData === 'object') {
-        emoteId = emoteData.id || emoteData.emoteId || emoteData.name;
-    }
-
-    if (emoteId && typeof emoteId === 'string') {
-        const saved = addDance(emoteId, emoteId);
-        if (saved) {
-            console.log(`✅ SAVED: ${emoteId} (Total: ${savedDances.length})`);
+    if (emoteId) {
+        const username = userData && userData.username ? userData.username : 'unknown';
+        if (addDance(emoteId)) {
+            console.log(`✅ NEW movement saved: "${emoteId}" by ${username} (Total: ${savedDances.length})`);
         }
     }
 });
@@ -151,11 +136,12 @@ bot.on('Chat', async (user, message) => {
         const text = getText(message);
         const lower = text.toLowerCase();
 
-        console.log(`📨 ${username}: "${text}"`);
+        console.log(`📨 ${username} (${userId}): "${text}"`);
 
+        // ═══ !help ═══
         if (lower === '!help' || lower === '!مساعدة') {
             await delay(300);
-            await bot.message.send(`📜 !1-!8 | !user | !رقصات | !رقص [رقم]`);
+            await bot.message.send(`📜 !رقصات | !رقص [رقم] | !يوزر [اسم]`);
             return;
         }
 
@@ -163,10 +149,10 @@ bot.on('Chat', async (user, message) => {
         if (lower === '!رقصات' || lower === '!dances') {
             await delay(300);
             if (savedDances.length === 0) {
-                await bot.message.send(`📭 ما عندي رقصات. ارقص عشان أتعلم!`);
+                await bot.message.send(`📭 ما عندي حركات`);
                 return;
             }
-            let msg = `💃 الرقصات (${savedDances.length}):\n`;
+            let msg = `💃 الحركات (${savedDances.length}):\n`;
             savedDances.forEach((d, i) => {
                 msg += `${i + 1}. ${d.id}\n`;
             });
@@ -174,14 +160,14 @@ bot.on('Chat', async (user, message) => {
             return;
         }
 
-        // ═══ !رقص [رقم] ═══
-        if (lower.startsWith('!رقص') || lower.startsWith('!dance')) {
+        // ═══ !رقص [رقم] - نجرب كل الطرق الممكنة ═══
+        if (lower.startsWith('!رقص') || lower.startsWith('!dance') || lower.startsWith('!حركة')) {
             const parts = text.split(' ');
             const numStr = parts[1] ? parts[1].trim() : '';
 
             if (!numStr) {
                 await delay(300);
-                await bot.message.send(`❌ !رقص [رقم]`);
+                await bot.message.send(`❌ اكتب رقم: !رقص 1`);
                 return;
             }
 
@@ -194,153 +180,84 @@ bot.on('Chat', async (user, message) => {
 
             const dance = savedDances[num - 1];
             await delay(300);
-            console.log(`💃 Dance #${num} for ${username}: ${dance.id}`);
+            console.log(`═══════════════════════════════`);
+            console.log(`💃 Testing ALL methods for: ${dance.id}`);
+            console.log(`   User: ${username} (${userId})`);
+            console.log(`═══════════════════════════════`);
 
-            let success = false;
-            let usedMethod = '';
-
-            if (!success && bot.player && typeof bot.player.emote === 'function') {
-                try {
-                    await bot.player.emote(userId, dance.id);
-                    success = true;
-                    usedMethod = 'player.emote';
-                    console.log(`✅ Method 1 worked`);
-                } catch (e) { console.log(`M1: ${e.message}`); }
-            }
-
-            if (!success && bot.player && typeof bot.player.playEmote === 'function') {
-                try {
-                    await bot.player.playEmote(userId, dance.id);
-                    success = true;
-                    usedMethod = 'player.playEmote';
-                    console.log(`✅ Method 2 worked`);
-                } catch (e) { console.log(`M2: ${e.message}`); }
-            }
-
-            if (!success && bot.webapi && bot.webapi.room && typeof bot.webapi.room.emote === 'function') {
-                try {
-                    await bot.webapi.room.emote(userId, dance.id);
-                    success = true;
-                    usedMethod = 'webapi.room.emote';
-                    console.log(`✅ Method 3 worked`);
-                } catch (e) { console.log(`M3: ${e.message}`); }
-            }
-
-            if (!success && bot.webapi && bot.webapi.player && typeof bot.webapi.player.emote === 'function') {
-                try {
-                    await bot.webapi.player.emote(userId, dance.id);
-                    success = true;
-                    usedMethod = 'webapi.player.emote';
-                    console.log(`✅ Method 4 worked`);
-                } catch (e) { console.log(`M4: ${e.message}`); }
-            }
-
-            if (!success && typeof bot.emote === 'function') {
-                try {
-                    await bot.emote(userId, dance.id);
-                    success = true;
-                    usedMethod = 'bot.emote';
-                    console.log(`✅ Method 5 worked`);
-                } catch (e) { console.log(`M5: ${e.message}`); }
-            }
-
-            if (success) {
-                await bot.message.send(`💃 ${username} يرقص! (${usedMethod})`);
-            } else {
-                await bot.message.send(`⚠️ ما قدرت — شوف Console`);
-            }
-            return;
-        }
-
-        // ═══ الألعاب ═══
-        if (lower === '!1' || lower === '!نرد') {
-            await delay(300);
-            await bot.message.send(`🎲 ${username}: ${Math.floor(Math.random() * 6) + 1}`);
-            return;
-        }
-        if (lower === '!2' || lower === '!عملة') {
-            await delay(300);
-            await bot.message.send(`🪙 ${Math.random() < 0.5 ? 'صورة' : 'كتابة'}`);
-            return;
-        }
-        if (lower === '!3' || lower === '!حجر') {
-            await delay(300);
-            rpsGames[username] = true;
-            await bot.message.send(`✊ ${username}: 1=حجر 2=ورقة 3=مقص`);
-            return;
-        }
-        if (rpsGames[username] && ['1', '2', '3'].includes(lower)) {
-            await delay(300);
-            const c = { '1': 'حجر', '2': 'ورقة', '3': 'مقص' };
-            const b = String(Math.floor(Math.random() * 3) + 1);
-            let r = '😢 خسرت';
-            if (lower === b) r = '🤝 تعادل';
-            else if ((lower === '1' && b === '3') || (lower === '2' && b === '1') || (lower === '3' && b === '2')) r = '🎉 فزت';
-            await bot.message.send(`أنت: ${c[lower]} | البوت: ${c[b]} — ${r}`);
-            delete rpsGames[username];
-            return;
-        }
-        if (lower === '!4' || lower === '!خمن') {
-            await delay(300);
-            const t = Math.floor(Math.random() * 50) + 1;
-            guessGames[username] = { target: t, tries: 0 };
-            await bot.message.send(`🎯 ${username} خمن 1-50!`);
-            return;
-        }
-        if (guessGames[username] && /^\d+$/.test(lower)) {
-            await delay(300);
-            const g = parseInt(lower);
-            const game = guessGames[username];
-            game.tries++;
-            if (g === game.target) {
-                await bot.message.send(`🎉 صح! في ${game.tries}`);
-                delete guessGames[username];
-            } else if (g < game.target) {
-                await bot.message.send(`⬆️ أكبر`);
-            } else {
-                await bot.message.send(`⬇️ أصغر`);
-            }
-            return;
-        }
-        if (lower === '!5' || lower === '!لغز') {
-            await delay(300);
-            const r = rand(riddles);
-            riddleGames[username] = { answer: r.a };
-            await bot.message.send(`🧩 ${r.q}`);
-            return;
-        }
-        if (riddleGames[username] && !lower.startsWith('!')) {
-            await delay(300);
-            if (text === riddleGames[username].answer) {
-                await bot.message.send(`🎉 صح!`);
-            } else {
-                await bot.message.send(`❌ الجواب: ${riddleGames[username].answer}`);
-            }
-            delete riddleGames[username];
-            return;
-        }
-        if (lower === '!6' || lower === '!نكتة') {
-            await delay(300);
-            await bot.message.send(`😂 ${rand(jokes)}`);
-            return;
-        }
-        if (lower === '!7' || lower === '!تحدي') {
-            await delay(300);
-            await bot.message.send(`😈 ${rand(challenges)}`);
-            return;
-        }
-        if (lower === '!8' || lower === '!مدح') {
-            await delay(300);
-            await bot.message.send(`🌹 ${rand(compliments)}`);
-            return;
-        }
-
-        // ═══ !user ═══
-        if (lower.startsWith('!user') || lower.startsWith('!معلومات')) {
+            // ═══ الطريقة 1 ═══
             try {
-                let target = text.replace(/^!user/i, '').replace(/^!معلومات/, '').trim().replace('@', '').trim();
+                console.log(`[1] bot.player.emote(userId, emoteId)...`);
+                await bot.player.emote(userId, dance.id);
+                console.log(`[1] ✅ SUCCESS`);
+            } catch (e) { console.log(`[1] ❌ ${e.message}`); }
+
+            await delay(500);
+
+            // ═══ الطريقة 2 ═══
+            try {
+                console.log(`[2] bot.player.emote(emoteId)...`);
+                await bot.player.emote(dance.id);
+                console.log(`[2] ✅ SUCCESS`);
+            } catch (e) { console.log(`[2] ❌ ${e.message}`); }
+
+            await delay(500);
+
+            // ═══ الطريقة 3: highrise.send_emote ═══
+            if (bot.highrise && typeof bot.highrise.send_emote === 'function') {
+                try {
+                    console.log(`[3] bot.highrise.send_emote(emoteId)...`);
+                    await bot.highrise.send_emote(dance.id);
+                    console.log(`[3] ✅ SUCCESS`);
+                } catch (e) { console.log(`[3] ❌ ${e.message}`); }
+            }
+
+            await delay(500);
+
+            // ═══ الطريقة 4: bot.highrise.send_emote(userId, emoteId) ═══
+            if (bot.highrise && typeof bot.highrise.send_emote === 'function') {
+                try {
+                    console.log(`[4] bot.highrise.send_emote(userId, emoteId)...`);
+                    await bot.highrise.send_emote(userId, dance.id);
+                    console.log(`[4] ✅ SUCCESS`);
+                } catch (e) { console.log(`[4] ❌ ${e.message}`); }
+            }
+
+            await delay(500);
+
+            // ═══ الطريقة 5: bot.highrise.send_whisper ═══
+            if (bot.highrise && typeof bot.highrise.send_whisper === 'function') {
+                try {
+                    console.log(`[5] bot.highrise.send_whisper...`);
+                    await bot.highrise.send_whisper(userId, `/emote ${dance.id}`);
+                    console.log(`[5] ✅ SUCCESS`);
+                } catch (e) { console.log(`[5] ❌ ${e.message}`); }
+            }
+
+            await delay(500);
+
+            // ═══ الطريقة 6: bot.room.emote ═══
+            if (bot.room && typeof bot.room.emote === 'function') {
+                try {
+                    console.log(`[6] bot.room.emote(userId, emoteId)...`);
+                    await bot.room.emote(userId, dance.id);
+                    console.log(`[6] ✅ SUCCESS`);
+                } catch (e) { console.log(`[6] ❌ ${e.message}`); }
+            }
+
+            console.log(`═══════════════════════════════`);
+
+            await bot.message.send(`💃 جربت كل الطرق لـ: ${dance.id}\nشوف Console!`);
+            return;
+        }
+
+        // ═══ !يوزر ═══
+        if (lower.startsWith('!user') || lower.startsWith('!معلومات') || lower.startsWith('!يوزر')) {
+            try {
+                let target = text.replace(/^!user/i, '').replace(/^!معلومات/, '').replace(/^!يوزر/, '').trim().replace('@', '').trim();
                 if (!target) target = username;
                 await delay(500);
+                await bot.message.send(`🔍 البحث عن ${target}...`);
                 const p = await bot.webapi.users.get(target);
                 if (!p || !p.ok) { await bot.message.send(`❌ ما لقيت`); return; }
                 const info = [`👤 ${p.username || target}`];
@@ -352,7 +269,7 @@ bot.on('Chat', async (user, message) => {
             return;
         }
 
-        // ═══ ردود تلقائية ═══
+        // ═══ ردود ═══
         const greetings = ['هلا', 'مرحبا', 'سلام', 'اهلا', 'hi', 'hello'];
         if (greetings.includes(lower)) {
             await delay(400);
