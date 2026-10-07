@@ -1,64 +1,102 @@
 const { Highrise } = require('highrise.bot');
 const bot = new Highrise();
 
+// دالة استخراج النص من الرسالة
+function getText(message) {
+    if (typeof message === 'string') return message.trim();
+    if (message && typeof message === 'object') {
+        // جرّب كل الأسماء المحتملة
+        return String(
+            message.message || 
+            message.content || 
+            message.text || 
+            message.body || 
+            message.msg ||
+            ''
+        ).trim();
+    }
+    return '';
+}
+
 // عند الاتصال
 bot.once('Ready', () => {
-    console.log('✅ البوت متصل!');
+    console.log('✅ Bot Connected');
 });
 
 // ترحيب
 bot.on('UserJoined', async (user) => {
-    console.log('👤 دخل:', user.username);
+    console.log(`👤 Join: ${user.username}`);
     try {
         await bot.message.send(`أهلاً ${user.username}`);
     } catch (e) {
-        console.log('خطأ:', e.message);
+        console.log('Error:', e.message);
     }
 });
 
-// استقبال الرسائل - نسخة بسيطة
+// استقبال الرسائل
 bot.on('Chat', async (user, message) => {
     try {
-        const text = String(message).trim();
-        const username = user.username;
-        
-        // LOG مهم - يسجل كل شي
-        console.log('╔══════════════════════════');
-        console.log('║ 👤 User:', username);
-        console.log('║ 💬 Text:', text);
-        console.log('║ 📏 Length:', text.length);
-        console.log('╚══════════════════════════');
+        const username = user.username || 'User';
+        const text = getText(message);
+        const lower = text.toLowerCase();
 
-        // رد بسيط (بدون سطور، بدون إيموجيات معقدة)
-        if (text === '!test') {
+        console.log(`📨 ${username}: "${text}"`);
+
+        // !test
+        if (lower === '!test') {
             await bot.message.send('OK');
-            console.log('✅ رد');
+            console.log('✅ test');
             return;
         }
 
-        if (text === '!help') {
-            await bot.message.send('Commands: !1 !2 !3 !4 !5 !6 !7');
-            console.log('✅ help sent');
+        // !help
+        if (lower === '!help') {
+            await bot.message.send('!1 !2 !3 !4 !5 !6 !7');
+            console.log('✅ help');
             return;
         }
 
-        if (text === '!1') {
+        // !1 نرد
+        if (lower === '!1') {
             const n = Math.floor(Math.random() * 6) + 1;
             await bot.message.send(`Dice: ${n}`);
-            console.log('✅ dice sent');
+            console.log('✅ 1');
             return;
         }
 
-        if (text === '!2') {
+        // !2 عملة
+        if (lower === '!2') {
             const r = Math.random() < 0.5 ? 'Heads' : 'Tails';
             await bot.message.send(`Coin: ${r}`);
-            console.log('✅ coin sent');
+            console.log('✅ 2');
             return;
         }
 
-        if (text === '!6') {
-            await bot.message.send('Haha funny joke :)');
-            console.log('✅ joke sent');
+        // !6 نكتة
+        if (lower === '!6') {
+            await bot.message.send('Haha :)');
+            console.log('✅ 6');
+            return;
+        }
+
+        // !3 حجر ورقة مقص
+        if (lower === '!3') {
+            await bot.message.send('Write: 1=Rock 2=Paper 3=Scissors');
+            console.log('✅ 3');
+            return;
+        }
+
+        // !4 خمن
+        if (lower === '!4') {
+            const n = Math.floor(Math.random() * 50) + 1;
+            await bot.message.send(`Guess 1-50! Answer: ${n}`);
+            console.log('✅ 4');
+            return;
+        }
+
+        // ردود تلقائية
+        if (['هلا', 'مرحبا', 'سلام'].includes(text)) {
+            await bot.message.send(`أهلاً ${username}!`);
             return;
         }
 
@@ -68,4 +106,4 @@ bot.on('Chat', async (user, message) => {
 });
 
 bot.login(process.env.HIGHRISE_TOKEN, process.env.HIGHRISE_ROOM_ID);
-console.log('🚀 Starting bot...');
+console.log('🚀 Bot Starting...');
